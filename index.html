@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Hazard Tracker</title>
+    <style>
+        body { 
+            font-family: system-ui, sans-serif; 
+            max-width: 600px; 
+            margin: 40px auto; 
+            padding: 0 20px;
+            background: #fdfdfd;
+            color: #222;
+        }
+        form { 
+            background: #f4f4f4; 
+            padding: 20px; 
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        label { 
+            display: block; 
+            margin-top: 12px; 
+            font-weight: bold; 
+        }
+        input, select, button { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 6px; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button { 
+            background: #111; 
+            color: white; 
+            margin-top: 18px; 
+            cursor: pointer; 
+            font-weight: bold;
+        }
+        button:hover { 
+            background: #333; 
+        }
+        .issue-card { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin-top: 12px; 
+            border-radius: 4px; 
+        }
+        .water-leak { border-left: 6px solid #0066cc; }
+        .trash { border-left: 6px solid #cc3300; }
+        .drain { border-left: 6px solid #ffcc00; }
+        
+        .meta-text {
+            margin: 6px 0 0 0;
+            color: #555;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Community Hazard Tracker</h1>
+    <p>Log local issues so neighbors know what needs to be cleaned up or repaired.</p>
+    
+    <form id="hazardForm">
+        <label for="userName">Your Name</label>
+        <input type="text" id="userName" required>
+
+        <label for="issueType">What is the issue?</label>
+        <select id="issueType">
+            <option value="water-leak">Water Leak / Broken Sprinkler</option>
+            <option value="trash">Litter / Illegal Dumping</option>
+            <option value="drain">Blocked Storm Drain</option>
+        </select>
+
+        <label for="location">Where is it located?</label>
+        <input type="text" id="location" required>
+
+        <button type="submit">Submit Report</button>
+    </form>
+
+    <h2>Active Reports</h2>
+    <div id="reportList"></div>
+
+<script>
+    const form = document.getElementById('hazardForm');
+    const list = document.getElementById('reportList');
+
+    let reports = JSON.parse(localStorage.getItem('neighborhoodHazards')) || [];
+
+    function showReports() {
+        list.innerHTML = '';
+        if (reports.length === 0) {
+            list.innerHTML = '<p>No issues reported yet.</p>';
+            return;
+        }
+        
+        reports.forEach((item) => {
+            const div = document.createElement('div');
+            div.className = `issue-card ${item.type}`;
+            
+            let labelText = '';
+            if(item.type === 'water-leak') labelText = 'Water Leak';
+            if(item.type === 'trash') labelText = 'Litter';
+            if(item.type === 'drain') labelText = 'Blocked Drain';
+
+            div.innerHTML = `
+                <strong>${labelText}</strong>
+                <p class="meta-text"><strong>Location:</strong> ${item.location}</p>
+                <p class="meta-text"><strong>Reported by:</strong> ${item.name}</p>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const newReport = {
+            name: document.getElementById('userName').value,
+            type: document.getElementById('issueType').value,
+            location: document.getElementById('location').value
+        };
+
+        reports.push(newReport);
+        localStorage.setItem('neighborhoodHazards', JSON.stringify(reports));
+        showReports();
+        form.reset();
+    });
+
+    showReports();
+</script>
+
+</body>
+</html>
